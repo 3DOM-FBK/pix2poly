@@ -1,6 +1,5 @@
 ## Codes for paper "From Pixels to Polylines: Extracting Vectorized LOD2.2 Roof Structures from Aerial Imagery with Line Segment Detection Networks" for ISPRS 2026 Congress.
 
-### Comparison
 ![alt text](comparison.png)
 
 # LOD2.2 Roof-Line Data Preparation
