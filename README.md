@@ -2,7 +2,6 @@
 
 ![alt text](comparison.png)
 
-# LOD2.2 Roof-Line Data Preparation
 
 The root scripts prepare the tiled image/vector data shared by all networks.
 The `ULSD`, `HAWP`, `F-Clip`, and `L-CNN` folders contain network-specific
@@ -69,7 +68,11 @@ codes, and output folders.
 Scripts `1` to `8` are shared preprocessing utilities. The subfolders contain
 the final JSON converters and visualization/merge helpers for each network.
 
-## ULSD Preparation Workflow
+## Common Preprocessing Workflow
+
+Run these shared steps first. They prepare the image tiles, per-tile GeoJSON
+linework, world files, and train/test split used by all network-specific
+exporters.
 
 1. `1_overlapped_ortho_tiler_png.py`
    Tiles the true orthophoto into non-overlapping 512 x 512 PNG tiles and writes
@@ -98,11 +101,63 @@ the final JSON converters and visualization/merge helpers for each network.
 7. `8_move_testfiles.py`
    Moves the selected test files to `outputs/test`. This is dry-run by default.
 
-8. `ULSD/ulsd.py`
-   Converts tiled GeoJSON linework into ULSD-style pixel-coordinate JSON.
+8. Check that each selected tile has matching image, world file, and GeoJSON
+   files with the same stem, for example:
 
-9. `ULSD/ulsd_visualize.py`
-   Opens a visual checker for the generated ULSD JSON labels and images.
+```text
+tile_r00001_c00002.png
+tile_r00001_c00002.wld
+tile_r00001_c00002.geojson
+```
+
+After this common preparation, choose the exporter for the target network.
+
+## Network-Specific Workflows
+
+### ULSD
+
+9. `ULSD/ulsd.py`
+   Converts tiled GeoJSON linework into ULSD-style pixel-coordinate JSON. Run it
+   once for train and once for test by editing `GEOJSON_DIR`, `RASTER_DIR`, and
+   `OUTPUT_JSON`.
+
+10. `ULSD/ulsd_visualize.py`
+    Opens a visual checker for the generated ULSD JSON labels and images.
+
+### HAWP
+
+9. `HAWP/hawpv2_train.py`
+   Builds HAWP-style `train.json` from train tiles, world files, and per-tile
+   GeoJSON files.
+
+10. `HAWP/hawpv2_test.py`
+    Builds HAWP-style `test.json` from the selected test tiles.
+
+11. Optional helpers:
+    `HAWP/hawpv2_train_json_merge.py` and `HAWP/hawpv2_test_json_merge.py` merge
+    multiple city/dataset JSON files; `HAWP/hawpv2_train_visualize.py` and
+    `HAWP/hawpv2_test_visualize.py` inspect the generated labels.
+
+### F-Clip
+
+9. `F-Clip/fclip_train_test.py`
+   Builds F-Clip-style JSON from tiles, world files, and per-tile GeoJSON files.
+   Run it once per split by editing `PNG_DIR`, `GEOJSON_DIR`, and `OUT_JSON`.
+
+10. Optional helpers:
+    `F-Clip/fclip_remove_lowline.py` filters samples with too few line segments,
+    `F-Clip/fclip_json_merge.py` merges multiple JSON files, and
+    `F-Clip/fclip_visualization.py` inspects the generated labels.
+
+### L-CNN
+
+9. `L-CNN/L-CNN.py`
+   Builds L-CNN-style merged JSON from per-tile GeoJSON and world files. Run it
+   once per split by editing `GJSON_GLOB`, `WLD_FOLDER`, and `OUTPUT_JSON`.
+
+10. `L-CNN/L-CNN_visualization.py`
+    Visualizes L-CNN image/label outputs, especially `*_label.npz` files created
+    after the L-CNN preprocessing pipeline.
 
 ## Network-Specific Converters
 
@@ -122,15 +177,6 @@ documentation, see:
 - HAWP: <https://github.com/cherubicXN/hawp>
 - F-Clip: <https://github.com/Delay-Xili/F-Clip>
 - L-CNN: <https://github.com/zhou13/lcnn>
-
-All converters expect image tiles, `.wld` files, and per-tile `.geojson` files
-to share the same stem, for example:
-
-```text
-tile_r00001_c00002.png
-tile_r00001_c00002.wld
-tile_r00001_c00002.geojson
-```
 
 ## Notes
 
