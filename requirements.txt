@@ -1,0 +1,12 @@
+geopandas
+shapely
+rasterio
+pyproj
+fiona
+pyogrio
+numpy
+pandas
+pillow
+opencv-python
+tqdm
+orjson
